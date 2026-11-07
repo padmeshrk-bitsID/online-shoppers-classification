@@ -1,0 +1,160 @@
+{
+  "created_utc": "2026-11-07T07:34:45+00:00",
+  "dataset": "UCI Online Shoppers Purchasing Intention (id 468)",
+  "problem": "Binary classification: will the session end in a purchase?",
+  "target": "Revenue",
+  "class_labels": {
+    "0": "No purchase",
+    "1": "Purchase"
+  },
+  "numeric_features": [
+    "Administrative",
+    "Administrative_Duration",
+    "Informational",
+    "Informational_Duration",
+    "ProductRelated",
+    "ProductRelated_Duration",
+    "BounceRates",
+    "ExitRates",
+    "PageValues",
+    "SpecialDay"
+  ],
+  "categorical_features": [
+    "Month",
+    "OperatingSystems",
+    "Browser",
+    "Region",
+    "TrafficType",
+    "VisitorType",
+    "Weekend"
+  ],
+  "split": {
+    "train_rows": 9764,
+    "test_rows": 2441,
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratified": true
+  },
+  "tuning": {
+    "method": "GridSearchCV",
+    "cv_folds": 5,
+    "refit_metric": "f1"
+  },
+  "library_versions": {
+    "python": "3.13.18",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "joblib": "1.6.0"
+  },
+  "models": [
+    {
+      "key": "logistic_regression",
+      "name": "Logistic Regression",
+      "file": "logistic_regression.joblib",
+      "best_params": {
+        "C": 0.003,
+        "class_weight": "balanced"
+      },
+      "cv_scores": {
+        "f1": 0.6669,
+        "roc_auc": 0.9119
+      },
+      "test_metrics": {
+        "Accuracy": 0.8808,
+        "AUC": 0.9205,
+        "Precision": 0.588,
+        "Recall": 0.7958,
+        "F1": 0.6763,
+        "MCC": 0.6157
+      }
+    },
+    {
+      "key": "decision_tree",
+      "name": "Decision Tree",
+      "file": "decision_tree.joblib",
+      "best_params": {
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 6,
+        "min_samples_leaf": 60
+      },
+      "cv_scores": {
+        "f1": 0.6563,
+        "roc_auc": 0.9219
+      },
+      "test_metrics": {
+        "Accuracy": 0.9021,
+        "AUC": 0.9262,
+        "Precision": 0.7227,
+        "Recall": 0.6073,
+        "F1": 0.66,
+        "MCC": 0.6065
+      }
+    },
+    {
+      "key": "knn",
+      "name": "KNN",
+      "file": "knn.joblib",
+      "best_params": {
+        "n_neighbors": 35,
+        "p": 2,
+        "weights": "distance"
+      },
+      "cv_scores": {
+        "f1": 0.6042,
+        "roc_auc": 0.9134
+      },
+      "test_metrics": {
+        "Accuracy": 0.8939,
+        "AUC": 0.9154,
+        "Precision": 0.7043,
+        "Recall": 0.555,
+        "F1": 0.6208,
+        "MCC": 0.5655
+      }
+    },
+    {
+      "key": "naive_bayes",
+      "name": "Naive Bayes (Gaussian)",
+      "file": "naive_bayes.joblib",
+      "best_params": {
+        "var_smoothing": 1.0
+      },
+      "cv_scores": {
+        "f1": 0.5921,
+        "roc_auc": 0.8699
+      },
+      "test_metrics": {
+        "Accuracy": 0.8578,
+        "AUC": 0.8734,
+        "Precision": 0.5347,
+        "Recall": 0.7068,
+        "F1": 0.6088,
+        "MCC": 0.5316
+      }
+    },
+    {
+      "key": "svm",
+      "name": "SVM",
+      "file": "svm.joblib",
+      "best_params": {
+        "C": 10,
+        "class_weight": "balanced",
+        "gamma": 0.001
+      },
+      "cv_scores": {
+        "f1": 0.6669,
+        "roc_auc": 0.9158
+      },
+      "test_metrics": {
+        "Accuracy": 0.882,
+        "AUC": 0.9255,
+        "Precision": 0.5914,
+        "Recall": 0.7958,
+        "F1": 0.6786,
+        "MCC": 0.6183
+      }
+    }
+  ]
+}
