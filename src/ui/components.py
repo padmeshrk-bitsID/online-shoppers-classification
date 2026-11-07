@@ -46,9 +46,21 @@ def _stagger(index: int, step_ms: int = 70) -> str:
 
 
 # ----------------------------------------------------------------------------- page furniture
-def hero(title: str, tagline: str, chips: list[str]) -> str:
+def author_credit(name: str, identifier: str) -> str:
+    """'Made by <name> · <id>' line (used in the header)."""
+    return (f'<div class="osc-byline"><span>👤 Made by <b>{escape(name)}</b></span>'
+            f'<span class="osc-sep">·</span><span>{escape(identifier)}</span></div>')
+
+
+def hero(title: str, tagline: str, chips: list[str], byline: str = "") -> str:
+    """Page header; `byline` is optional ready-made HTML (e.g. from `author_credit`)."""
     chip_html = "".join(f'<span class="osc-chip">{escape(chip)}</span>' for chip in chips)
-    return f'<div class="osc-hero"><h1>{escape(title)}</h1><p>{escape(tagline)}</p>{chip_html}</div>'
+    return f'<div class="osc-hero"><h1>{escape(title)}</h1><p>{escape(tagline)}</p>{chip_html}{byline}</div>'
+
+
+def watermark(name: str, identifier: str) -> str:
+    """Small badge pinned to the bottom-right corner of the window (stays visible while scrolling)."""
+    return f'<div class="osc-watermark">Made by {escape(name)} · {escape(identifier)}</div>'
 
 
 def step_cards(steps: list[tuple[str, str, str]]) -> str:

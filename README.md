@@ -114,6 +114,7 @@ the upload box and the model drop-down side by side. Below it, every result is s
 | Results of all models on the test data | **🏆 Compare all models** section: winner per metric, overall winner (by MCC), an interactive ranking chart (pick any metric) next to a heatmap of all metrics, the full table with metric bars, and a CSV download |
 
 **Ease of use**
+* **Author credit**: "Made by Padmesh Kumbhar · BITS ID: 2026AJ05321" appears in the page header and as a small badge pinned to the bottom-right corner, visible while scrolling.
 * **Results by default**: the page opens on the bundled held-out test split, so the statistics are visible without any clicks. A badge row shows which file is being scored, how many sessions it has and how many are buyers.
 * **Percentages everywhere in the app**: every metric (cards, tables, heatmap, CV scores) is shown as a percentage, e.g. 0.8820 becomes 88.20 %. MCC runs from -100 % to +100 % (0 % = no better than guessing). The comparison table in section d keeps the decimal format the assignment template asks for.
 * **Colour-coded, interactive graphics** (hover any mark for details). Every colour also comes with a symbol and a text label, so colour is never the only cue:

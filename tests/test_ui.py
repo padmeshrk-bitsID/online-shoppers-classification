@@ -125,3 +125,11 @@ def test_section_nav_links_to_each_anchor():
     markup = ui.section_nav([("performance", "📊 Model performance"), ("help", "Help & <FAQ>")])
     assert 'href="#performance"' in markup and 'href="#help"' in markup
     assert "&lt;FAQ&gt;" in markup and "\n" not in markup
+
+
+def test_author_credit_in_header_and_watermark():
+    from src.ui.content import AUTHOR_ID, AUTHOR_NAME
+    header = ui.hero("T", "t", [], byline=ui.author_credit(AUTHOR_NAME, AUTHOR_ID))
+    assert "Made by <b>Padmesh Kumbhar</b>" in header and "BITS ID: 2026AJ05321" in header
+    mark = ui.watermark(AUTHOR_NAME, AUTHOR_ID)
+    assert "osc-watermark" in mark and "Padmesh Kumbhar" in mark and "2026AJ05321" in mark

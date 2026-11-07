@@ -359,7 +359,9 @@ def show_help() -> None:
 
 # ------------------------------------------------------------------ entry point
 def main() -> None:
-    html(ui.hero(content.APP_TITLE, content.APP_TAGLINE, content.HERO_CHIPS))
+    credit = ui.author_credit(content.AUTHOR_NAME, content.AUTHOR_ID)
+    html(ui.hero(content.APP_TITLE, content.APP_TAGLINE, content.HERO_CHIPS, byline=credit))
+    html(ui.watermark(content.AUTHOR_NAME, content.AUTHOR_ID))
     try:
         service = get_service()
     except FileNotFoundError as error:

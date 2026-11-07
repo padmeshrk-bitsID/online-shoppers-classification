@@ -1,6 +1,8 @@
 """All user-facing wording in one place (no logic), so text can change without touching code."""
 
 APP_TITLE = "Online Shopper Purchase Prediction"
+AUTHOR_NAME = "Padmesh Kumbhar"
+AUTHOR_ID = "BITS ID: 2026AJ05321"
 APP_TAGLINE = (
     "Evaluate five pre-trained classifiers on your test data and see "
     "how well each one predicts whether a browsing session ends in a purchase."

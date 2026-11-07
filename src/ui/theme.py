@@ -59,6 +59,17 @@ _CSS = f"""
 .osc-chip {{ display: inline-block; padding: 4px 11px; margin: 4px 6px 0 0; border-radius: 999px;
   background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); font-size: .8rem; color: #fff; }}
 
+/* ---------- author credit: header byline + corner watermark ---------- */
+.osc-byline {{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: fit-content; margin-top: 14px;
+  padding: 6px 13px; border-radius: 10px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.3);
+  color: #fff; font-size: .88rem; }}
+.osc-byline b {{ color: #fff; }}
+.osc-sep {{ opacity: .6; }}
+.osc-watermark {{ position: fixed; right: 18px; bottom: 14px; z-index: 1000; pointer-events: none;
+  font-size: .74rem; font-weight: 600; color: {TEXT_SECONDARY}; letter-spacing: .01em;
+  background: rgba(255,255,255,.82); border: 1px solid {BORDER}; border-radius: 999px; padding: 5px 13px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06); backdrop-filter: blur(4px); opacity: .85; }}
+
 /* ---------- generic card ---------- */
 .osc-card {{
   background: {SURFACE}; color: {TEXT}; border: 1px solid {BORDER}; border-radius: 14px;
