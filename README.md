@@ -54,13 +54,13 @@ This is a **binary classification** problem.
 
 ## c. GitHub Repository Link
 
-**GitHub repository:** `<add your GitHub repository URL here>`
+**GitHub repository:** `https://github.com/padmeshrk-bitsID/online-shoppers-classification`
 
-**Live Streamlit app:** `<add your Streamlit Community Cloud URL here>`
+**Live Streamlit app:** `https://online-shoppers-classification-2026aj05321.streamlit.app/`
 
 The repository contains all required files: `app.py`, `requirements.txt`, `README.md`, `test_data.csv`,
 the `model/` folder with all five trained models (`.joblib`), the source code (`src/`, `train_models.py`), and the
-executed notebook as a PDF report (`ML_Assignment_Online_Shoppers_Classification.pdf`) that anyone can open and read.
+executed notebook as a PDF report (`2026AJ05321_detailed_project_explanation.pdf`) that anyone can open and read.
 
 ## d. Models used
 
