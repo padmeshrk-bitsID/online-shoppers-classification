@@ -71,6 +71,12 @@ def badge(text: str, tone: str = "blue") -> str:
     return f'<span class="osc-badge {escape(tone)}">{escape(text)}</span>'
 
 
+def section_nav(links: list[tuple[str, str]]) -> str:
+    """Row of pill links that scroll to the page sections: (anchor, label)."""
+    pills = "".join(f'<a href="#{escape(anchor)}">{escape(label)}</a>' for anchor, label in links)
+    return f'<div class="osc-nav">{pills}</div>'
+
+
 def callout(html_text: str) -> str:
     """Highlighted sentence. `html_text` must already be safe (built from our own numbers)."""
     return f'<div class="osc-callout">{html_text}</div>'
@@ -253,7 +259,7 @@ def describe_confusion(cm: np.ndarray) -> str:
             f"<b>{fp:,} of {non_buyers:,}</b> non-buyers as buyers ({false_alarm}).")
 
 
-# ----------------------------------------------------------------------------- sidebar
+# ----------------------------------------------------------------------------- setup panel
 def model_card(name: str, blurb: str, params: dict, cv_scores: dict, file_name: str, recommended: bool) -> str:
     """Selected model: description, tuned hyper-parameters and where it was loaded from."""
     star = badge("Recommended", "green") if recommended else ""

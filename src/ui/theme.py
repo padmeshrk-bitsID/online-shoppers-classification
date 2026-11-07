@@ -37,9 +37,14 @@ _CSS = f"""
 
 /* ---------- layout polish ---------- */
 .block-container {{ padding-top: 1.6rem; padding-bottom: 3rem; max-width: 1280px; }}
-[data-testid="stSidebar"] {{ border-right: 1px solid {BORDER}; }}
 [data-testid="stFileUploaderDropzone"] {{ border: 2px dashed {PRIMARY}55; border-radius: 12px; transition: background .2s ease; }}
 [data-testid="stFileUploaderDropzone"]:hover {{ background: {PRIMARY}0d; }}
+
+/* ---------- section jump links ---------- */
+.osc-nav {{ display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; animation: osc-fade-up .5s ease both; }}
+.osc-nav a {{ text-decoration: none; padding: 6px 14px; border-radius: 999px; background: {SURFACE}; border: 1px solid {BORDER};
+  color: {TEXT} !important; font-size: .85rem; font-weight: 600; transition: all .15s ease; }}
+.osc-nav a:hover {{ border-color: {PRIMARY}; color: {PRIMARY_DARK} !important; background: {PRIMARY}0d; }}
 
 /* ---------- hero banner ---------- */
 .osc-hero {{
@@ -112,7 +117,7 @@ _CSS = f"""
 .osc-cm-cell.correct {{ background: {PRIMARY}16; color: #123f73; border-color: {PRIMARY}33; }}
 .osc-cm-cell.wrong {{ background: {ACCENT}14; color: #8a3410; border-color: {ACCENT}33; }}
 
-/* ---------- sidebar model card ---------- */
+/* ---------- model card (setup panel) ---------- */
 .osc-model h4 {{ display: flex; justify-content: space-between; align-items: center; }}
 .osc-param {{ display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem;
   background: #f3f4f6; color: {TEXT}; border-radius: 6px; padding: 2px 6px; margin: 3px 4px 0 0; }}

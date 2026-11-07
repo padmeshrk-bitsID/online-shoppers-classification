@@ -3,12 +3,15 @@
 Run locally:
     streamlit run app.py
 
-Where each required feature lives in the UI
-    a. Dataset upload (CSV, test data only)  -> sidebar, step 1
-    b. Model selection drop-down             -> sidebar, step 2
-    c. Display of evaluation metrics         -> "Model performance" tab (six animated cards)
-    d. Confusion matrix + classification report -> "Model performance" tab
-    +  Results of all five models on the test data -> "Compare all models" tab
+Page layout (one page, nothing hidden behind a sidebar or tabs)
+    Setup panel (always visible at the top)
+        a. Dataset upload (CSV, test data only)   -> left column
+        b. Model selection drop-down              -> right column
+    Results (shown straight away on the bundled test data, replaced by your upload)
+        c. Evaluation metrics                     -> "Model performance" section
+        d. Confusion matrix + classification report -> "Model performance" section
+        +  Results of all five models             -> "Compare all models" section
+        +  Row-level predictions                  -> "Predictions" section
 
 The app NEVER retrains: it loads the saved pipelines from `model/` and only predicts.
 This file is presentation only; every calculation is delegated to `src/`.
@@ -41,19 +44,17 @@ from src.ui.theme import page_css
 from src.visualization import plot_metric_heatmap
 
 # ------------------------------------------------------------------ constants
-DATA_SOURCE_KEY = "data_source"
-SOURCE_UPLOAD = "📤 Upload my test CSV"
-SOURCE_SAMPLE = "📦 Use bundled test_data.csv"
 PREVIEW_ROWS = 500
 PERCENT_FORMAT = "%.2f%%"   # tables show 0.882 as 88.20%
-
-
-def percent_column(label: str, help_text: str | None = None):
-    """Table column showing a 0-100 value as a percentage with a progress bar."""
-    return st.column_config.ProgressColumn(label, help=help_text, format=PERCENT_FORMAT, min_value=0.0, max_value=100.0)
 UCI_URL = "https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset"
+SECTIONS = [  # (anchor, label) for the jump links under the setup panel
+    ("performance", "📊 Model performance"),
+    ("comparison", "🏆 Compare all models"),
+    ("predictions", "🔍 Predictions"),
+    ("help", "📘 Help"),
+]
 
-st.set_page_config(page_title=content.APP_TITLE, page_icon="🛒", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title=content.APP_TITLE, page_icon="🛒", layout="wide", initial_sidebar_state="collapsed")
 silence_expected_warnings()
 st.markdown(page_css(), unsafe_allow_html=True)
 
@@ -61,6 +62,16 @@ st.markdown(page_css(), unsafe_allow_html=True)
 def html(markup: str) -> None:
     """Render one of our own HTML components."""
     st.markdown(markup, unsafe_allow_html=True)
+
+
+def percent_column(label: str, help_text: str | None = None):
+    """Table column showing a 0-100 value as a percentage with a progress bar."""
+    return st.column_config.ProgressColumn(label, help=help_text, format=PERCENT_FORMAT, min_value=0.0, max_value=100.0)
+
+
+def section_title(anchor: str) -> None:
+    """Section heading that the jump links can scroll to."""
+    st.subheader(dict(SECTIONS)[anchor], anchor=anchor, divider="gray")
 
 
 # ------------------------------------------------------------------ cached work
@@ -76,8 +87,9 @@ def read_csv(content_bytes: bytes) -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner=False)
-def sample_csv_bytes() -> bytes:
-    return config.TEST_DATA_PATH.read_bytes()
+def sample_csv_bytes() -> bytes | None:
+    path = config.TEST_DATA_PATH
+    return path.read_bytes() if path.exists() else None
 
 
 # A leading underscore tells Streamlit not to hash that argument (the service is shared).
@@ -91,11 +103,6 @@ def compare_models(_service: PredictionService, raw: pd.DataFrame) -> pd.DataFra
     return _service.compare_all(raw)
 
 
-def use_sample_data() -> None:
-    """Button callback: switch the data-source selector to the bundled test file."""
-    st.session_state[DATA_SOURCE_KEY] = SOURCE_SAMPLE
-
-
 def notify_once(event: tuple, message: str) -> None:
     """Show a toast only when something actually changed (not on every re-run)."""
     if st.session_state.get("last_event") != event:
@@ -103,41 +110,44 @@ def notify_once(event: tuple, message: str) -> None:
         st.toast(message, icon="✅")
 
 
-# ------------------------------------------------------------------ sidebar: inputs
-def sidebar_data_step(service: PredictionService) -> tuple[pd.DataFrame | None, str, str | None]:
-    """Step 1. Returns (table or None, label for the UI, error message or None)."""
-    st.sidebar.markdown("### 1 · Test data")
-    source = st.sidebar.radio(
-        "Data source", [SOURCE_UPLOAD, SOURCE_SAMPLE], key=DATA_SOURCE_KEY,
-        help="Upload your own test split, or use the held-out test split saved during training.",
-    )
-    if source == SOURCE_SAMPLE:
+# ------------------------------------------------------------------ setup panel (inputs)
+def data_input(service: PredictionService) -> tuple[pd.DataFrame | None, str, str | None]:
+    """Requirement (a). Returns (table or None, label for the UI, error message or None).
+
+    Until a file is uploaded, the bundled held-out test split is used, so results are visible at once.
+    """
+    st.markdown("##### 1 · Test data")
+    uploaded = st.file_uploader("Upload your test CSV (optional)", type=["csv"], help=content.UPLOAD_HELP)
+    sample = sample_csv_bytes()
+
+    if uploaded is not None:
+        st.caption(f"✅ Showing results for your file **{uploaded.name}**. Remove it to go back to the bundled data.")
+    elif sample is not None:
         rows = service.metadata["split"]["test_rows"]
-        st.sidebar.caption(f"Held-out 20 % test split saved during training ({rows:,} sessions).")
-        return read_csv(sample_csv_bytes()), "bundled test_data.csv", None
+        st.caption(f"ℹ️ No file uploaded yet: showing results on the bundled **test_data.csv** "
+                   f"({rows:,} held-out test sessions). Upload a CSV above to evaluate your own file.")
+    if sample is not None:
+        st.download_button("⬇️ Download sample test_data.csv", data=sample, file_name="test_data.csv",
+                           mime="text/csv", help="A correctly formatted test file: upload it as-is or use it as a template.")
 
-    uploaded = st.sidebar.file_uploader("Upload test CSV", type=["csv"], help=content.UPLOAD_HELP)
-    st.sidebar.download_button(
-        "⬇️ Download sample test_data.csv", data=sample_csv_bytes(), file_name="test_data.csv",
-        mime="text/csv", help="A correctly formatted test file: upload it as-is or use it as a template.",
-    )
-    if uploaded is None:
-        st.sidebar.caption("📎 Drag & drop a **.csv** with the 17 features + `Revenue`.")
+    if uploaded is not None:
+        try:
+            return read_csv(uploaded.getvalue()), uploaded.name, None
+        except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError):
+            return None, uploaded.name, "The file could not be read as a CSV. Please export it as comma-separated UTF-8."
+    if sample is None:
         return None, "", None
-    try:
-        return read_csv(uploaded.getvalue()), uploaded.name, None
-    except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError):
-        return None, uploaded.name, "The file could not be read as a CSV. Please export it as comma-separated UTF-8."
+    return read_csv(sample), "bundled test_data.csv", None
 
 
-def sidebar_model_step(service: PredictionService) -> str:
-    """Step 2: model drop-down plus a card describing the selected model."""
-    st.sidebar.markdown("### 2 · Model")
+def model_input(service: PredictionService) -> str:
+    """Requirement (b): model drop-down plus a card describing the selected model."""
+    st.markdown("##### 2 · Model")
     names = service.model_names()
     recommended = service.recommended_model()
-    selected = st.sidebar.selectbox(
+    selected = st.selectbox(
         "Classifier", names, index=names.index(recommended),
-        format_func=lambda name: f"{name}  ⭐" if name == recommended else name,
+        format_func=lambda name: f"{name}  ⭐ recommended" if name == recommended else name,
         placeholder="Choose a classifier...",
         help=f"{content.MODEL_HELP} ⭐ = best MCC on the held-out test set.",
     )
@@ -147,18 +157,18 @@ def sidebar_model_step(service: PredictionService) -> str:
     return selected
 
 
-def sidebar_help() -> None:
-    st.sidebar.markdown("---")
-    with st.sidebar.expander("❓ Need help?"):
-        st.markdown(
-            "- Your CSV needs the **17 input features + `Revenue`**. Order doesn't matter.\n"
-            "- `Revenue` / `Weekend` accept **TRUE/FALSE, 1/0 or yes/no**.\n"
-            "- Models are **loaded, never retrained**.\n"
-            "- Full column guide, glossary and FAQ: open the **📘 Help** tab."
-        )
+def setup_panel(service: PredictionService) -> tuple[pd.DataFrame | None, str, str | None, str]:
+    """Fixed panel at the top of the page holding both inputs side by side."""
+    with st.container(border=True):
+        data_column, model_column = st.columns([1.15, 1], gap="large")
+        with data_column:
+            raw, label, error = data_input(service)
+        with model_column:
+            model_name = model_input(service)
+    return raw, label, error, model_name
 
 
-# ------------------------------------------------------------------ main panel: states
+# ------------------------------------------------------------------ messages
 def column_guide_table() -> pd.DataFrame:
     return pd.DataFrame(
         [(column, kind, example) for column, (kind, example) in content.COLUMN_GUIDE.items()],
@@ -167,14 +177,12 @@ def column_guide_table() -> pd.DataFrame:
 
 
 def show_empty_state() -> None:
-    """What the user sees before any data is chosen: guidance instead of a blank page."""
+    """Only reached if the bundled test file is missing and nothing was uploaded."""
     html(ui.empty_state("📤", "Upload your test CSV to begin",
-                        "Use step 1 in the sidebar to upload a CSV with the 17 input features and the Revenue "
-                        "column, or try the app instantly with the bundled test data."))
-    _, middle, _ = st.columns([1, 1, 1])
-    middle.button("▶  Try it with the bundled test data", on_click=use_sample_data, type="primary")
+                        "Use the Test data box above to upload a CSV with the 17 input features and the "
+                        "Revenue column."))
     html(ui.step_cards(content.HOW_TO_STEPS))
-    with st.expander("📄 Required CSV format (18 columns)"):
+    with st.expander("📄 Required CSV format (18 columns)", expanded=True):
         st.dataframe(column_guide_table(), hide_index=True)
 
 
@@ -183,7 +191,8 @@ def show_input_problems(label: str, problems: list[str]) -> None:
     st.error(f"**{label}** can't be evaluated yet. Please fix the following:", icon="🚫")
     for problem in problems:
         st.markdown(f"- {problem}")
-    st.info("Tip: download **sample test_data.csv** from the sidebar to see a correctly formatted file.", icon="💡")
+    st.info("Tip: remove your file to see the bundled test data, or compare your columns with the format below.",
+            icon="💡")
     with st.expander("📄 Required CSV format (18 columns)", expanded=True):
         st.dataframe(column_guide_table(), hide_index=True)
 
@@ -211,7 +220,7 @@ def show_data_summary(label: str, output: PredictionOutput) -> None:
          + ui.badge(f"{buyers:,} actual buyers ({buyers / rows:.1%})", "orange"))
 
 
-# ------------------------------------------------------------------ main panel: tabs
+# ------------------------------------------------------------------ result sections
 def show_metric_glossary() -> None:
     st.dataframe(
         pd.DataFrame([(name, meaning, formula) for name, (meaning, formula) in content.METRIC_HELP.items()],
@@ -222,6 +231,7 @@ def show_metric_glossary() -> None:
 
 def show_performance(model_name: str, output: PredictionOutput, comparison: pd.DataFrame) -> None:
     """Requirements (c) and (d): metric cards, confusion matrix and classification report."""
+    section_title("performance")
     evaluation = output.evaluation
     title, glossary = st.columns([5, 1], vertical_alignment="center")
     title.markdown(f"#### {model_name}: evaluation metrics")
@@ -263,7 +273,7 @@ def show_performance(model_name: str, output: PredictionOutput, comparison: pd.D
 
 def show_comparison(table: pd.DataFrame, selected: str) -> None:
     """Results of all five saved models on the same test data."""
-    st.markdown("#### Results of all five models on this test data")
+    section_title("comparison")
     st.caption("Every saved model is scored on the same file. Nothing is retrained.")
     html(ui.best_model_cards(table))
 
@@ -272,11 +282,18 @@ def show_comparison(table: pd.DataFrame, selected: str) -> None:
         html(ui.callout(f"🏆 <b>Overall winner on this data: {mcc.idxmax()}</b> (highest MCC, the fairest single "
                         "metric when buyers are only ~15 % of sessions)."))
 
-    st.markdown("##### Rank the models by a metric")
-    metric = st.segmented_control("Metric to rank by", METRIC_NAMES, default="MCC", key="rank_metric",
-                                  help="Pick a metric to re-order the models. Hover a bar for details.") or "MCC"
-    html(ui.ranking_bars(table, metric, selected))
-    html(ui.band_legend())
+    ranking, heatmap = st.columns([1, 1], gap="large")
+    with ranking:
+        st.markdown("##### Rank the models by a metric")
+        metric = st.segmented_control("Metric to rank by", METRIC_NAMES, default="MCC", key="rank_metric",
+                                      help="Pick a metric to re-order the models. Hover a bar for details.") or "MCC"
+        html(ui.ranking_bars(table, metric, selected))
+        html(ui.band_legend())
+    with heatmap:
+        st.markdown("##### All metrics at a glance")
+        figure = plot_metric_heatmap(table, title="Metrics on this data (bold = best in column)", as_percent=True)
+        st.pyplot(figure)
+        plt.close(figure)  # free memory: Streamlit re-runs the script on every interaction
 
     st.markdown("##### Full comparison table")
     display = (table * 100).reset_index(names="Model")           # show as percentages
@@ -286,10 +303,6 @@ def show_comparison(table: pd.DataFrame, selected: str) -> None:
         column_config={metric: percent_column(metric, content.METRIC_HELP[metric][0]) for metric in METRIC_NAMES},
     )
     st.caption("All values are percentages. MCC runs from -100% to +100% (0% = no better than guessing).")
-    with st.expander("🗺️ Heatmap view"):
-        figure = plot_metric_heatmap(table, title="Metrics on this data (bold = best in column)", as_percent=True)
-        st.pyplot(figure)
-        plt.close(figure)  # free memory: Streamlit re-runs the script on every interaction
     st.download_button("⬇️ Download comparison (CSV)", table.to_csv().encode(),
                        file_name="model_comparison.csv", mime="text/csv")
 
@@ -305,6 +318,7 @@ PREDICTION_FILTERS = {
 
 def show_predictions(output: PredictionOutput) -> None:
     """Row-level results with quick filters and a CSV download."""
+    section_title("predictions")
     predictions = output.predictions
     html(ui.outcome_mix(output.evaluation.confusion))
     choice = st.radio("Show", list(PREDICTION_FILTERS), horizontal=True,
@@ -329,16 +343,17 @@ def show_predictions(output: PredictionOutput) -> None:
 
 
 def show_help() -> None:
-    st.markdown("#### How to use this app")
-    html(ui.step_cards(content.HOW_TO_STEPS))
-    st.markdown("#### Evaluation metrics")
-    show_metric_glossary()
-    st.markdown("#### Required CSV format")
-    st.dataframe(column_guide_table(), hide_index=True)
-    st.markdown("#### FAQ")
-    for question, answer in content.FAQ:
-        with st.expander(question):
-            st.markdown(answer)
+    """Reference material: collapsible because it isn't part of the results."""
+    section_title("help")
+    with st.expander("How to use this app"):
+        html(ui.step_cards(content.HOW_TO_STEPS))
+    with st.expander("Evaluation metrics: meaning and formulas"):
+        show_metric_glossary()
+    with st.expander("Required CSV format (18 columns)"):
+        st.dataframe(column_guide_table(), hide_index=True)
+    with st.expander("FAQ"):
+        for question, answer in content.FAQ:
+            st.markdown(f"**{question}**  \n{answer}")
     st.caption(f"Dataset: [UCI Online Shoppers Purchasing Intention (id 468)]({UCI_URL}) · CC BY 4.0")
 
 
@@ -351,9 +366,7 @@ def main() -> None:
         st.error(f"{error}", icon="🚫")
         st.stop()
 
-    raw, label, read_error = sidebar_data_step(service)
-    model_name = sidebar_model_step(service)
-    sidebar_help()
+    raw, label, read_error, model_name = setup_panel(service)
 
     if read_error:
         show_input_problems(label, [read_error])
@@ -376,17 +389,12 @@ def main() -> None:
 
     notify_once((label, report.n_rows, model_name), f"{model_name} evaluated on {report.n_rows:,} rows")
     show_data_summary(label, output)
+    html(ui.section_nav(SECTIONS))
 
-    performance_tab, comparison_tab, predictions_tab, help_tab = st.tabs(
-        ["📊 Model performance", "🏆 Compare all models", "🔍 Predictions", "📘 Help"])
-    with performance_tab:
-        show_performance(model_name, output, comparison)
-    with comparison_tab:
-        show_comparison(comparison, model_name)
-    with predictions_tab:
-        show_predictions(output)
-    with help_tab:
-        show_help()
+    show_performance(model_name, output, comparison)
+    show_comparison(comparison, model_name)
+    show_predictions(output)
+    show_help()
 
 
 if __name__ == "__main__":

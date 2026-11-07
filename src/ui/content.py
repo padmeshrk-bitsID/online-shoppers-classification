@@ -10,11 +10,11 @@ HERO_CHIPS = ["UCI dataset #468", "Binary target: Revenue", "5 pre-trained model
 # (icon, title, text) for the 3-step "how it works" strip
 HOW_TO_STEPS = [
     ("📤", "Upload test data",
-     "A CSV with the 17 input features and the Revenue column, or the bundled test_data.csv."),
+     "Use the Setup panel at the top. Until you upload a CSV, results are shown on the bundled test_data.csv."),
     ("🧠", "Pick a model",
-     "Choose one of the five saved classifiers from the drop-down in the sidebar."),
+     "Choose one of the five saved classifiers from the drop-down next to the upload box."),
     ("📊", "Explore the results",
-     "Six metrics, a confusion matrix, a classification report and a side-by-side comparison of all models."),
+     "Scroll down for the six metrics, confusion matrix, classification report, model comparison and predictions."),
 ]
 
 UPLOAD_HELP = (
@@ -68,6 +68,9 @@ COLUMN_GUIDE = {
 }
 
 FAQ = [
+    ("Why do I see results before uploading anything?",
+     ("The app opens on the bundled held-out test split (test_data.csv) so you can explore straight away. "
+      "Upload your own CSV and every result on the page switches to your file.")),
     ("Is any model retrained on my file?",
      ("No. The app loads the saved, already-trained pipelines from the `model/` folder and only predicts. "
       "Your file is never used for training.")),

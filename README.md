@@ -98,29 +98,33 @@ KNN `n_neighbors=35, weights='distance', p=2` · Naive Bayes (Gaussian) `var_smo
 
 ### Streamlit app
 
-The app loads the five **saved** models from `model/` and evaluates them on the uploaded test file. **No model is
-retrained on the uploaded data.** The uploaded CSV must contain all **17 input features and the `Revenue` target column**.
+The app loads the five **saved** models from `model/` and evaluates them on the test file. **No model is retrained on
+the uploaded data.** An uploaded CSV must contain all **17 input features and the `Revenue` target column**.
+
+**Layout: one page, nothing hidden.** There is no slide-out sidebar and no tabs. A fixed **Setup panel** at the top holds
+the upload box and the model drop-down side by side. Below it, every result is shown straight away on the bundled
+`test_data.csv`; uploading a CSV switches the whole page to your file. Jump links under the panel scroll to each section.
 
 | Required feature | Where it is in the app |
 |---|---|
-| a. Dataset upload option (CSV, test data only) | Sidebar **Step 1**: drag-and-drop uploader (or the bundled `test_data.csv`), plus a *Download sample test_data.csv* button |
-| b. Model selection drop-down | Sidebar **Step 2**: the five models, the best one marked ⭐; a card shows the model's description, tuned hyper-parameters, CV scores and the file it was loaded from |
-| c. Display of evaluation metrics | **📊 Model performance** tab: six animated cards (Accuracy, AUC, Precision, Recall, F1, MCC) shown as **percentages** (e.g. Accuracy 88.20 %), colour-coded Good / Moderate / Low, with hover explanations and a "best" tag; plus a chart of where the selected model stands among all five on each metric |
-| d. Confusion matrix / classification report | **📊 Model performance** tab: both, side by side, with a plain-English summary ("Caught 304 of 382 buyers…") |
-| Results of all models on the test data | **🏆 Compare all models** tab: winner per metric, overall winner (by MCC), an interactive ranking chart (pick any metric), full table with metric bars, heatmap, CSV download |
+| a. Dataset upload option (CSV, test data only) | **Setup panel, 1 · Test data**: drag-and-drop uploader, a note saying which data is shown, and a *Download sample test_data.csv* button |
+| b. Model selection drop-down | **Setup panel, 2 · Model**: the five models, the best one marked ⭐; a card shows the model's description, tuned hyper-parameters, CV scores and the file it was loaded from |
+| c. Display of evaluation metrics | **📊 Model performance** section: six animated cards (Accuracy, AUC, Precision, Recall, F1, MCC) shown as **percentages** (e.g. Accuracy 88.20 %), colour-coded Good / Moderate / Low, with hover explanations and a "best" tag; plus a chart of where the selected model stands among all five on each metric |
+| d. Confusion matrix / classification report | **📊 Model performance** section: both, side by side, with a plain-English summary ("Caught 304 of 382 buyers…") |
+| Results of all models on the test data | **🏆 Compare all models** section: winner per metric, overall winner (by MCC), an interactive ranking chart (pick any metric) next to a heatmap of all metrics, the full table with metric bars, and a CSV download |
 
 **Ease of use**
+* **Results by default**: the page opens on the bundled held-out test split, so the statistics are visible without any clicks. A badge row shows which file is being scored, how many sessions it has and how many are buyers.
 * **Percentages everywhere in the app**: every metric (cards, tables, heatmap, CV scores) is shown as a percentage, e.g. 0.8820 becomes 88.20 %. MCC runs from -100 % to +100 % (0 % = no better than guessing). The comparison table in section d keeps the decimal format the assignment template asks for.
 * **Colour-coded, interactive graphics** (hover any mark for details). Every colour also comes with a symbol and a text label, so colour is never the only cue:
   * **Performance bands**: ▲ Good (80 % and above, green), ● Moderate (60–80 %, amber), ▼ Low (below 60 %, red) on the metric cards and ranking bars, with a colour key.
   * **Where the model stands**: for each metric, the selected model's score (coloured dot) next to the other four models (grey dots) and their range, on a 0–100 % scale.
   * **Rank the models by a metric**: choose a metric and the five models re-order as colour-coded bars; the winner gets a 🏆 and the selected model is outlined.
   * **Where the predictions landed**: a stacked bar splitting every test session into correct no-purchase, correct purchase, false alarm and missed buyer, with counts and percentages.
-* **Guided empty state**: a 3-step "how it works" guide, the required CSV format, and a one-click *Try it with the bundled test data* button.
 * **Upload checks before scoring**: missing features, a missing `Revenue` column, empty cells, unreadable or non-numeric data each produce a clear message plus the expected format. Extra columns are ignored and reported.
-* **Help everywhere**: tooltips on every input, a *Metric guide* pop-over, a sidebar *Need help?* box and a **📘 Help** tab (steps, metric glossary with formulas, CSV column guide, FAQ).
-* **🔍 Predictions** tab: row-level results with quick filters (correct / misclassified / missed buyers / false alarms) and a CSV download.
-* **Animations**: animated gradient header, cards that fade in one after another, metric bars that grow to their value, confusion-matrix cells that pop in, a pulsing upload icon, a step-by-step status box ("file checked → model loaded → metrics computed") and a toast when results are ready. All of them are switched off for users whose system asks for reduced motion.
+* **Help where it's needed**: tooltips on every input, a *Metric guide* pop-over next to the metrics, and a **📘 Help** section at the bottom (how-to steps, metric glossary with formulas, CSV column guide, FAQ) in expandable boxes, the only collapsed part of the page.
+* **🔍 Predictions** section: row-level results with quick filters (correct / misclassified / missed buyers / false alarms) and a CSV download.
+* **Animations**: animated gradient header, cards that fade in one after another, metric bars that grow to their value, confusion-matrix cells that pop in, a step-by-step status box ("file checked → model loaded → metrics computed") and a toast when results are ready. All of them are switched off for users whose system asks for reduced motion.
 
 ### Project structure
 

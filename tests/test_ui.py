@@ -119,3 +119,9 @@ def test_outcome_mix_shares_add_up():
     markup = ui.outcome_mix(np.array([[1849, 210], [78, 304]]))
     for text in ["1,849</b> (75.7%)", "304</b> (12.5%)", "210</b> (8.6%)", "78</b> (3.2%)", "2,441 PREDICTIONS"]:
         assert text in markup
+
+
+def test_section_nav_links_to_each_anchor():
+    markup = ui.section_nav([("performance", "📊 Model performance"), ("help", "Help & <FAQ>")])
+    assert 'href="#performance"' in markup and 'href="#help"' in markup
+    assert "&lt;FAQ&gt;" in markup and "\n" not in markup
