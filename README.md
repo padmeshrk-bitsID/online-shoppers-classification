@@ -54,9 +54,9 @@ This is a **binary classification** problem.
 
 ## c. GitHub Repository Link
 
-**GitHub repository:** `https://github.com/padmeshrk-bitsID/online-shoppers-classification`
+**GitHub repository:** <https://github.com/padmeshrk-bitsID/online-shoppers-classification>
 
-**Live Streamlit app:** `https://online-shoppers-classification-2026aj05321.streamlit.app/`
+**Live Streamlit app:** <https://online-shoppers-classification-2026aj05321.streamlit.app/>
 
 The repository contains all required files: `app.py`, `requirements.txt`, `README.md`, `test_data.csv`,
 the `model/` folder with all five trained models (`.joblib`), the source code (`src/`, `train_models.py`), and the
